@@ -278,7 +278,7 @@ open class XAxisRenderer: NSObject, AxisRenderer
                                  UIColor(named: "surface400")!,
                                  UIColor(named: "surface400")!,
                                  UIColor(named: "surface400")!,
-                                 UIColor(named: "secondary")!]
+                                 UIColor(named: "secondary600-Dark2")!]
         #endif
         
         for i in entries.indices
