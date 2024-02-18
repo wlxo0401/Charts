@@ -11,7 +11,9 @@
 
 import Foundation
 import CoreGraphics
-
+#if os(iOS)
+import UIKit
+#endif
 
 @objc(ChartXAxisRenderer)
 open class XAxisRenderer: NSObject, AxisRenderer
@@ -252,9 +254,9 @@ open class XAxisRenderer: NSObject, AxisRenderer
         let paraStyle = ParagraphStyle.default.mutableCopy() as! MutableParagraphStyle
         paraStyle.alignment = .center
         
-        let labelAttrs: [NSAttributedString.Key : Any] = [.font: axis.labelFont,
-                                                         .foregroundColor: axis.labelTextColor,
-                                                         .paragraphStyle: paraStyle]
+//        let labelAttrs: [NSAttributedString.Key : Any] = [.font: axis.labelFont,
+//                                                         .foregroundColor: axis.labelTextColor,
+//                                                         .paragraphStyle: paraStyle]
 
         let labelRotationAngleRadians = axis.labelRotationAngle.DEG2RAD
         let isCenteringEnabled = axis.isCenterAxisLabelsEnabled
@@ -270,8 +272,27 @@ open class XAxisRenderer: NSObject, AxisRenderer
         
         let entries = axis.entries
         
+        #if os(iOS)
+        let colors: [UIColor] = [UIColor(named: "surface400")!,
+                                 UIColor(named: "surface400")!,
+                                 UIColor(named: "surface400")!,
+                                 UIColor(named: "surface400")!,
+                                 UIColor(named: "surface400")!,
+                                 UIColor(named: "secondary")!]
+        #endif
+        
         for i in entries.indices
         {
+            #if os(iOS)
+            let labelAttrs: [NSAttributedString.Key : Any] = [.font: axis.labelFont,
+                                                              .foregroundColor: colors[i],
+                                                              .paragraphStyle: paraStyle]
+            #else
+            let labelAttrs: [NSAttributedString.Key : Any] = [.font: axis.labelFont,
+                                                              .foregroundColor: axis.labelTextColor,
+                                                              .paragraphStyle: paraStyle]
+            #endif
+            
             let px = isCenteringEnabled ? CGFloat(axis.centeredEntries[i]) : CGFloat(entries[i])
             position = CGPoint(x: px, y: 0)
                 .applying(valueToPixelMatrix)
