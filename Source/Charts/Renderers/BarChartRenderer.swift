@@ -381,7 +381,9 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
             
             // 일반 라운드
             #if os(iOS)
-            let bezierPath = UIBezierPath(roundedRect:barRect,byRoundingCorners:[.topRight, .topLeft], cornerRadii: CGSize(width: 4, height: 4))
+            let bezierPath = UIBezierPath(roundedRect: barRect,
+                                          byRoundingCorners: [.topRight, .topLeft],
+                                          cornerRadii: CGSize(width: 10, height: 10))
             context.addPath(bezierPath.cgPath)
             context.drawPath(using: .fill)
             #else
