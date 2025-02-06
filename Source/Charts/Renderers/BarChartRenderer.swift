@@ -380,12 +380,50 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
             }
             
 //            context.fill(barRect)
-            let cornerRadius = barRect.width / 2  // 반원을 만들기 위해 너비의 절반으로 설정
+//            let cornerRadius = barRect.width / 2  // 반원을 만들기 위해 너비의 절반으로 설정
+//            let bezierPath = UIBezierPath(roundedRect: barRect,
+//                                         byRoundingCorners: [.topLeft, .topRight], // 상단 모서리만 선택
+//                                         cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
+//            context.addPath(bezierPath.cgPath)
+//            context.drawPath(using: .fill)
+            
+            
+            let color = isSingleColor ? dataSet.color(atIndex: 0) : dataSet.color(atIndex: j)
+                        
+            // Create gradient
+            let colorSpace = CGColorSpaceCreateDeviceRGB()
+            let gradient = CGGradient(colorsSpace: colorSpace,
+                                    colors: [color.cgColor,
+                                            color.withAlphaComponent(0.7).cgColor] as CFArray,
+                                    locations: [0, 1])!
+            
+            let cornerRadius = barRect.width / 2
             let bezierPath = UIBezierPath(roundedRect: barRect,
-                                         byRoundingCorners: [.topLeft, .topRight], // 상단 모서리만 선택
-                                         cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
-            context.addPath(bezierPath.cgPath)
-            context.drawPath(using: .fill)
+                                        byRoundingCorners: [.topLeft, .topRight],
+                                        cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
+            
+            context.saveGState()
+            bezierPath.addClip()
+            
+            // Draw gradient
+            let startPoint = CGPoint(x: barRect.midX, y: barRect.minY)
+            let endPoint = CGPoint(x: barRect.midX, y: barRect.maxY)
+            context.drawLinearGradient(gradient,
+                                     start: startPoint,
+                                     end: endPoint,
+                                     options: [])
+            
+            context.restoreGState()
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             if drawBorder
             {
