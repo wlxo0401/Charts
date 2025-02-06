@@ -750,7 +750,11 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 
                 setHighlightDrawPos(highlight: high, barRect: barRect)
                 
-                context.fill(barRect)
+                //            context.fill(barRect)
+                let cornerRadius = barRect.width / 2  // 반원을 만들기 위해 너비의 절반으로 설정
+                let bezierPath = UIBezierPath(roundedRect: barRect,
+                                             byRoundingCorners: [.topLeft, .topRight], // 상단 모서리만 선택
+                                             cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
             }
         }
     }
