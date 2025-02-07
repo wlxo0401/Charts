@@ -265,8 +265,14 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                 context.setFillColor(dataSet.color(atIndex: j).cgColor)
             }
 
-            context.fill(barRect)
+//            context.fill(barRect)
 
+            let cornerRadius = barRect.height / 2  // 반원을 만들기 위해 너비의 절반으로 설정
+            let bezierPath = UIBezierPath(roundedRect: barRect,
+                                          byRoundingCorners: [.topRight, .bottomRight], // 상단 모서리만 선택
+                                         cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
+            context.addPath(bezierPath.cgPath)
+            context.drawPath(using: .fill)
             if drawBorder
             {
                 context.setStrokeColor(borderColor.cgColor)
@@ -623,5 +629,72 @@ open class HorizontalBarChartRenderer: BarChartRenderer
     internal override func setHighlightDrawPos(highlight high: Highlight, barRect: CGRect)
     {
         high.setDraw(x: barRect.midY, y: barRect.origin.x + barRect.size.width)
+    }
+    
+    open override func drawHighlighted(context: CGContext, indices: [Highlight])
+    {
+        guard
+            let dataProvider = dataProvider,
+            let barData = dataProvider.barData
+            else { return }
+        
+        context.saveGState()
+        defer { context.restoreGState() }
+        var barRect = CGRect()
+        
+        for high in indices
+        {
+            guard
+                let set = barData[high.dataSetIndex] as? BarChartDataSetProtocol,
+                set.isHighlightEnabled
+                else { continue }
+            
+            if let e = set.entryForXValue(high.x, closestToY: high.y) as? BarChartDataEntry
+            {
+                guard isInBoundsX(entry: e, dataSet: set) else { continue }
+                
+                let trans = dataProvider.getTransformer(forAxis: set.axisDependency)
+                
+                context.setFillColor(set.highlightColor.cgColor)
+                context.setAlpha(set.highlightAlpha)
+                
+                let isStack = high.stackIndex >= 0 && e.isStacked
+                
+                let y1: Double
+                let y2: Double
+                
+                if isStack
+                {
+                    if dataProvider.isHighlightFullBarEnabled
+                    {
+                        y1 = e.positiveSum
+                        y2 = -e.negativeSum
+                    }
+                    else
+                    {
+                        let range = e.ranges?[high.stackIndex]
+                        
+                        y1 = range?.from ?? 0.0
+                        y2 = range?.to ?? 0.0
+                    }
+                }
+                else
+                {
+                    y1 = e.y
+                    y2 = 0.0
+                }
+                
+                prepareBarHighlight(x: e.x, y1: y1, y2: y2, barWidthHalf: barData.barWidth / 2.0, trans: trans, rect: &barRect)
+                
+                setHighlightDrawPos(highlight: high, barRect: barRect)
+                
+                let cornerRadius = barRect.height / 2  // 가로 바의 경우 height를 기준으로 radius 계산
+                let bezierPath = UIBezierPath(roundedRect: barRect,
+                                            byRoundingCorners: [.topRight, .bottomRight],  // 우측 모서리에 radius 적용
+                                            cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
+                context.addPath(bezierPath.cgPath)
+                context.drawPath(using: .fill)
+            }
+        }
     }
 }
